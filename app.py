@@ -86,13 +86,12 @@ def login():
 @app.route("/profile/<username>", methods=["GET", "POST"])
 def profile(username):
     username = mongo.db.users.find_one(
-        {"username": session["user"]}["username"]
-    )
+        {"username": session["user"]})["username"]
+
     if session["user"]:
         return render_template("profile.html", username=username)
 
-    else:
-        return redirect(url_for("login"))
+    return redirect(url_for("login"))
 
 
 @app.route("/logout")
@@ -154,6 +153,19 @@ def delete_task(task_id):
 def get_categories():
     categories = list(mongo.db.categories.find().sort("category_name", 1))
     return render_template("categories.html", categories=categories)
+
+
+@app.route("/add_category", methods=["GET", "POST"])
+def add_category():
+    if request.method == "POST":
+        category = {
+            "category_name": request.form.get("category_name")
+        }
+        mongo.db.categories.insert_one(category)
+        flash("New Category Added")
+        return redirect(url_for("get_categories"))
+
+    return render_template("add_category.html")
 
 
 if __name__ == "__main__":
